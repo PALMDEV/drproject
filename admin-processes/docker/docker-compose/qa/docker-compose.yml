@@ -1,6 +1,8 @@
 web:
-  image: luisdavis/drprojectqa:lastest
-  container_name: qa_angular_front
+  image: luisdavis/drproject-enviroment
+  container_name: drproject-enviroment
   ports:
-   - "80:80"
-   - "443:443"
+   - "8009:80"
+   - "127.0.0.,:4200:4200"
+  volumes:
+  - ../../../../:/drproject
