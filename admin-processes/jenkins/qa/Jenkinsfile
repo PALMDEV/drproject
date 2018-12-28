@@ -1,22 +1,67 @@
 pipeline {
     agent any
 
+    parameters {
+        string(defaultValue: "develop", description: '', name: 'branch_name_provided')
+    }
+
     stages {
         stage('Build') {
             steps {
+                // checkout scm  
+                // git([url: 'git://example.com/amazing-project.git', branch: 'master'])
+                // sh 'git clone https://github.com/PALMDEV/drproject.git'
                 echo 'Building..'
+                
+                
+                setBuildStatus("In Progress","PENDING","Jenkins CI","${GIT_COMMIT}")
+                
             }
         }
         stage('Test') {
             steps {
                 echo 'Testing..'
+                // echo "${GITHUB_PR_NUMBER}" throws and error
+                
             }
+            post {
+                failure {
+                    echo "Test are failing"
+                    setBuildStatus("Test are failing","FAILURE","Jenkins CI","${GIT_COMMIT}")
+                    // error('least')
+                }    
+            }
+
+
         }
         stage('Deploy') {
+            when { branch "develop" }
             steps {
-                
                 echo 'Deploying....'
             }
         }
     }
+    post {
+        success {
+            echo "we dit it"
+            setBuildStatus("Complete","SUCCESS","Jenkins CI","${GIT_COMMIT}")
+        }
+        failure {
+            setBuildStatus("Complete","FAILURE","Jenkins CI","${GIT_COMMIT}")
+            // mail to: 'team@example.com', subject: 'Pipeline failed', body: "${env.BUILD_URL}"
+        }
+    }
+
+}
+
+def setBuildStatus(String message, String state, String context, String sha) {
+    step([
+        $class: "GitHubCommitStatusSetter",
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/PALMDEV/drproject.git"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: context],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        commitShaSource: [$class: "ManuallyEnteredShaSource", sha: sha ],
+        statusBackrefSource: [$class: "ManuallyEnteredBackrefSource", backref: "${BUILD_URL}flowGraphTable/"],
+        statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+    ]);
 }
