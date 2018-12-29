@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+    environment {
+        DOCKER_FILE_PATH = "admin-processes/docker/Dockerfile"
+    }
     parameters {
         string(defaultValue: "develop", description: '', name: 'branch_name_provided')
     }
@@ -11,9 +13,19 @@ pipeline {
                 // checkout scm  
                 // git([url: 'git://example.com/amazing-project.git', branch: 'master'])
                 // sh 'git clone https://github.com/PALMDEV/drproject.git'
+                
                 echo 'Building..'
+                // TODO: use jenkins credentials for login and generate new credentials for it
+                sh "docker login --username luisdavis --password pigui_02"
+                // Build Enviroment
+                sh "docker build -f DOCKER_FILE_PATH --target env -t luisdavis/drproject-enviroment:latest ."
+                // Build QA
+                sh "docker build -f DOCKER_FILE_PATH --target prod -t luisdavis/drproject-prod:latest ."
+                //TODO: add support for version tags to be able rollback a release
                 
-                
+                //Docker push 
+                sh "docker push luisdavis/drproject-enviroment:latest"
+                sh "docker push luisdavis/drproject-prod:latest"
                 setBuildStatus("In Progress","PENDING","Jenkins CI","${GIT_COMMIT}")
                 
             }
@@ -21,6 +33,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing..'
+                sh 'ng lint'
                 // echo "${GITHUB_PR_NUMBER}" throws and error
                 
             }
@@ -34,7 +47,7 @@ pipeline {
 
 
         }
-        stage('Deploy') {
+        stage('Deploy') { 
             when { branch "develop" }
             steps {
                 echo 'Deploying....'
