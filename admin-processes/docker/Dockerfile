@@ -28,7 +28,7 @@ EXPOSE 4200
 
 #Keep this container alive 
 #TODO: start a web server on foreground
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+CMD ["tail", "-f", "/dev/null"]
 
 FROM env as build
 

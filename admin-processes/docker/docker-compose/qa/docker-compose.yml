@@ -1,8 +1,8 @@
 web:
-  image: luisdavis/drprojectqa:lastest
-  container_name: luisdavis/drproject-enviroment
+  image: luisdavis/drproject-enviroment
+  container_name: drproject-enviroment
   ports:
-   - "80:80"
-   - "4200:4200"
+   - "8009:80"
+   - "127.0.0.,:4200:4200"
   volumes:
-  - ../../:/drproject
+  - ../../../../:/drproject
