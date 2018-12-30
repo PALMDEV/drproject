@@ -20,6 +20,7 @@ pipeline {
             steps {
                 echo 'Testing..'
                 sh 'ng lint'
+                sh 'ng test --no-watch'
                 setBuildStatus("Testing","PENDING","Jenkins CI","${GIT_COMMIT}")
             }
             post {
